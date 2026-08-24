@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="app-layout">
+    <div class="sidebar">
+        <h4 style="margin:0;">Book a Cab</h4>
+        <small id="hint" style="color:#f59e0b;">💡 Search address or click map for <b>Pickup</b>.</small>
+        
+        <div style="position:relative;">
+            <label>Pickup <input type="text" id="pAddr" placeholder="Search address or click map" autocomplete="off"></label>
+            <div id="pSuggestions" class="suggestions-dropdown"></div>
+        </div>
+
+        <div style="position:relative;">
+            <label>Drop-off <input type="text" id="dAddr" placeholder="Search address or click map" autocomplete="off"></label>
+            <div id="dSuggestions" class="suggestions-dropdown"></div>
+        </div>
+
+        <div class="fare-box">
+            <div><small style="color:#94a3b8;">Est. Fare</small><div id="dist">0.0 km</div></div>
+            <strong id="fare" style="font-size:1.4rem; color:#38bdf8;">$0.00</strong>
+        </div>
+        <button id="bookBtn" onclick="requestRide()" style="background:#38bdf8; border:none; color:#0f172a; font-weight:700;" disabled>Book Ride</button>
+        
+        <article id="statusCard" style="display:none; padding:0.8rem; margin-top:0.4rem; background:rgba(30,41,59,0.85); border:1px solid rgba(255,255,255,0.1); border-radius:8px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong>Status</strong><span id="badge" class="status-badge badge-pending">PENDING</span>
+            </div>
+            <div style="background:rgba(56,189,248,0.1); border:1px solid #38bdf8; border-radius:6px; padding:0.4rem; margin-top:0.4rem; text-align:center;">
+                <small>Give OTP to Driver</small>
+                <div id="otpVal" style="font-size:1.4rem; font-weight:700; color:#38bdf8; letter-spacing:3px;">----</div>
+            </div>
+            <button id="cancelBtn" onclick="cancelRide()" class="outline" style="margin-top:0.5rem; padding:0.3rem; font-size:0.8rem; border-color:#ef4444; color:#ef4444;">Cancel Ride</button>
+        </article>
+
+        <article id="ratingCard" style="display:none; padding:0.8rem; border:1px solid #10b981; border-radius:8px;">
+            <strong>Rate Your Driver</strong>
+            <div style="display:flex; gap:0.4rem; margin-top:0.4rem;">
+                <button onclick="submitRating(1)" style="padding:0.2rem 0.5rem;">1⭐</button>
+                <button onclick="submitRating(2)" style="padding:0.2rem 0.5rem;">2⭐</button>
+                <button onclick="submitRating(3)" style="padding:0.2rem 0.5rem;">3⭐</button>
+                <button onclick="submitRating(4)" style="padding:0.2rem 0.5rem;">4⭐</button>
+                <button onclick="submitRating(5)" style="padding:0.2rem 0.5rem; background:#10b981; border:none;">5⭐</button>
+            </div>
+        </article>
+
+        <h5 style="margin-top:0.8rem; margin-bottom:0.4rem;">Recent Trip History</h5>
+        <div id="historyBox"><small>Loading...</small></div>
+    </div>
+    <div class="map-container"><div id="map"></div></div>
+</div>
+{% endblock %}
+{% block scripts %}<script>document.addEventListener('DOMContentLoaded', setupPassengerMap);</script>{% endblock %}

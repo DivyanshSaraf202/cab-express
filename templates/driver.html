@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="app-layout">
+    <div class="sidebar">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h4 style="margin:0;">Driver Console</h4><span class="status-badge badge-accepted">ONLINE</span>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; background:rgba(255,255,255,0.05); padding:0.5rem; border-radius:8px;">
+            <div><small style="color:#94a3b8;">Earned</small><div id="totalEarned" style="font-weight:700; color:#10b981;">$0.00</div></div>
+            <div><small style="color:#94a3b8;">Trips</small><div id="tripCount" style="font-weight:700; color:#38bdf8;">0</div></div>
+            <div><small style="color:#94a3b8;">Rating</small><div id="avgRating" style="font-weight:700; color:#fba518;">⭐ 5.0</div></div>
+        </div>
+
+        <article id="simArea" style="display:none; border:1px solid #10b981; padding:0.6rem; margin:0; border-radius:8px;">
+            <strong style="color:#10b981;">Active Job Accepted</strong>
+            <div id="simMsg" style="font-size:0.8rem; margin-top:0.2rem;">Verify passenger OTP to start trip:</div>
+            
+            <div id="otpArea" style="margin-top:0.4rem;">
+                <input type="text" id="otpInput" placeholder="Enter 4-digit OTP" maxlength="4" style="padding:0.3rem; margin-bottom:0.4rem;">
+                <button onclick="startVerifiedTrip()" style="padding:0.3rem; background:#38bdf8; border:none; color:#0f172a; font-weight:700;">Verify OTP & Start</button>
+            </div>
+
+            <button id="simBtn" onclick="runSim()" style="display:none; background:#10b981; border:none; color:#fff; font-weight:700; padding:0.3rem; margin-top:0.4rem; width:100%;">▶ Run Route Simulation</button>
+        </article>
+
+        <strong>Incoming Requests</strong>
+        <div id="qList"><small>Searching...</small></div>
+        <button onclick="resetDemo()" class="secondary" style="margin-top:auto; padding:0.3rem; font-size:0.8rem;">🧹 Clear Rides</button>
+    </div>
+    <div class="map-container"><div id="map"></div></div>
+</div>
+{% endblock %}
+{% block scripts %}<script>document.addEventListener('DOMContentLoaded', setupDriverMap);</script>{% endblock %}

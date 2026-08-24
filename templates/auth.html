@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<main class="container" style="max-width:440px; margin-top:2rem;">
+    <article style="background:rgba(30,41,59,0.85); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:1.2rem;">
+        <div style="display:flex; gap:0.6rem; margin-bottom:1rem;">
+            <button id="tLogin" onclick="switchAuth('login')" style="padding:0.4rem; flex:1;">Login</button>
+            <button id="tReg" onclick="switchAuth('register')" class="outline" style="padding:0.4rem; flex:1;">Register</button>
+        </div>
+        <form method="POST" action="/auth">
+            <input type="hidden" id="act" name="action" value="login">
+            <label>Username <input type="text" name="username" required></label>
+            <div id="emailBox" style="display:none;"><label>Email <input type="email" name="email"></label></div>
+            <label>Password <input type="password" name="password" required></label>
+            <div id="roleBox" style="display:none; margin-bottom:1rem;">
+                <label><input type="radio" name="role" value="passenger" checked> Passenger</label>
+                <label><input type="radio" name="role" value="driver"> Driver</label>
+            </div>
+            <button type="submit" id="sBtn" style="background:#38bdf8; border:none; color:#0f172a; font-weight:700;">Sign In</button>
+        </form>
+    </article>
+</main>
+<script>
+    function switchAuth(m) {
+        document.getElementById('act').value = m;
+        document.getElementById('emailBox').style.display = m === 'register' ? 'block' : 'none';
+        document.getElementById('roleBox').style.display = m === 'register' ? 'block' : 'none';
+        document.getElementById('sBtn').innerText = m === 'register' ? 'Create Account' : 'Sign In';
+        document.getElementById('tLogin').className = m === 'login' ? '' : 'outline';
+        document.getElementById('tReg').className = m === 'register' ? '' : 'outline';
+    }
+</script>
+{% endblock %}
