@@ -80,7 +80,8 @@ def geocode():
 @login_required
 def request_ride():
     if current_user.role != 'passenger': return jsonify({"error": "Unauthorized"}), 403
-    d = request.json
+    d = request.get_json(silent=True) or {}
+    if not d or 'pickup_lat' not in d or 'dropoff_lat' not in d: return jsonify({"error": "Invalid request payload"}), 400
     plat, plng, dlat, dlng = float(d['pickup_lat']), float(d['pickup_lng']), float(d['dropoff_lat']), float(d['dropoff_lng'])
     dist = calc_dist(plat, plng, dlat, dlng)
     fare, otp = round(3.00 + (dist * 1.80), 2), str(random.randint(1000, 9999))
@@ -88,7 +89,7 @@ def request_ride():
         cur = conn.cursor()
         cur.execute("""INSERT INTO rides (passenger_id, passenger_name, pickup_address, pickup_lat, pickup_lng, dropoff_address, dropoff_lat, dropoff_lng, fare, otp)
                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                    (current_user.id, current_user.username, d['pickup_address'], plat, plng, d['dropoff_address'], dlat, dlng, fare, otp))
+                    (current_user.id, current_user.username, d.get('pickup_address', ''), plat, plng, d.get('dropoff_address', ''), dlat, dlng, fare, otp))
         rid = cur.lastrowid
         conn.commit()
     return jsonify({"success": True, "ride_id": rid, "fare": fare, "dist": dist, "otp": otp})
@@ -124,9 +125,10 @@ def accept_ride(rid):
 @login_required
 def verify_otp(rid):
     if current_user.role != 'driver': return jsonify({"error": "Unauthorized"}), 403
+    d = request.get_json(silent=True) or {}
     with get_db() as conn:
         r = conn.execute("SELECT * FROM rides WHERE id = ?", (rid,)).fetchone()
-        if r and r['otp'] == str(request.json.get('otp')).strip():
+        if r and r['otp'] == str(d.get('otp', '')).strip():
             conn.execute("UPDATE rides SET status = 'in_progress' WHERE id = ?", (rid,))
             conn.commit()
             return jsonify({"success": True})
@@ -135,8 +137,9 @@ def verify_otp(rid):
 @routes.route('/api/submit-rating/<int:rid>', methods=['POST'])
 @login_required
 def submit_rating(rid):
+    d = request.get_json(silent=True) or {}
     with get_db() as conn:
-        conn.execute("UPDATE rides SET rating = ? WHERE id = ? AND passenger_id = ?", (int(request.json.get('rating', 5)), rid, current_user.id))
+        conn.execute("UPDATE rides SET rating = ? WHERE id = ? AND passenger_id = ?", (int(d.get('rating', 5)), rid, current_user.id))
         conn.commit()
     return jsonify({"success": True})
 
@@ -152,7 +155,8 @@ def cancel_ride(rid):
 @login_required
 def update_progress(rid):
     if current_user.role != 'driver': return jsonify({"error": "Unauthorized"}), 403
-    d = request.json
+    d = request.get_json(silent=True) or {}
+    if 'driver_lat' not in d or 'driver_lng' not in d: return jsonify({"error": "Invalid payload"}), 400
     with get_db() as conn:
         conn.execute("UPDATE rides SET status = ?, driver_lat = ?, driver_lng = ? WHERE id = ? AND driver_id = ?",
                      (d.get('status', 'in_progress'), d['driver_lat'], d['driver_lng'], rid, current_user.id))

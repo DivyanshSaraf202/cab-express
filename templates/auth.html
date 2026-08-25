@@ -24,6 +24,8 @@
         document.getElementById('act').value = m;
         document.getElementById('emailBox').style.display = m === 'register' ? 'block' : 'none';
         document.getElementById('roleBox').style.display = m === 'register' ? 'block' : 'none';
+        const emailInput = document.querySelector('input[name="email"]');
+        if (emailInput) emailInput.required = (m === 'register');
         document.getElementById('sBtn').innerText = m === 'register' ? 'Create Account' : 'Sign In';
         document.getElementById('tLogin').className = m === 'login' ? '' : 'outline';
         document.getElementById('tReg').className = m === 'register' ? '' : 'outline';

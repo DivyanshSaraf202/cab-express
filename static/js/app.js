@@ -8,6 +8,8 @@ function initMap(center = [40.7128, -74.0060], zoom = 13) {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(pos => map.setView([pos.coords.latitude, pos.coords.longitude], 14), () => {});
     }
+    setTimeout(() => { map.invalidateSize(); }, 300);
+    setTimeout(() => { map.invalidateSize(); }, 1000);
     return map;
 }
 
@@ -76,6 +78,7 @@ function setupPassengerMap() {
     });
 
     window.requestRide = async () => {
+        if (!pCoords || !dCoords) return;
         const res = await fetch('/api/request-ride', {
             method: 'POST', headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ pickup_address: document.getElementById('pAddr').value, pickup_lat: pCoords.lat, pickup_lng: pCoords.lng, dropoff_address: document.getElementById('dAddr').value, dropoff_lat: dCoords.lat, dropoff_lng: dCoords.lng })
@@ -183,21 +186,29 @@ function setupDriverMap() {
         const otpIn = document.getElementById('otpInput').value;
         const res = await fetch(`/api/verify-otp/${activeRide.id}`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ otp: otpIn }) });
         if ((await res.json()).success) {
+            activeRide = await (await fetch(`/api/ride-status/${activeRide.id}`)).json();
             document.getElementById('otpArea').style.display = 'none';
-            document.getElementById('simBtn').style.display = 'block';
+            const btn = document.getElementById('simBtn');
+            btn.style.display = 'block';
+            btn.disabled = false;
             document.getElementById('simMsg').innerText = "OTP Verified! Ready to simulate route.";
         } else { alert("Incorrect OTP!"); }
     };
 
     window.runSim = () => {
-        document.getElementById('simBtn').disabled = true;
+        if (!activeRide) return;
+        const btn = document.getElementById('simBtn');
+        if (btn) btn.disabled = true;
         let step = 0, max = 20;
-        const sLat = activeRide.driver_lat, sLng = activeRide.driver_lng, eLat = activeRide.dropoff_lat, eLng = activeRide.dropoff_lng;
+        const sLat = parseFloat(activeRide.driver_lat || activeRide.pickup_lat),
+              sLng = parseFloat(activeRide.driver_lng || activeRide.pickup_lng),
+              eLat = parseFloat(activeRide.dropoff_lat),
+              eLng = parseFloat(activeRide.dropoff_lng);
         simTimer = setInterval(async () => {
             step++;
             const pct = step / max;
             const curLat = sLat + (eLat - sLat) * pct, curLng = sLng + (eLng - sLng) * pct;
-            cMark.setLatLng([curLat, curLng]);
+            if (cMark) cMark.setLatLng([curLat, curLng]);
             let st = pct >= 1 ? 'completed' : 'in_progress';
             await fetch(`/api/update-progress/${activeRide.id}`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({status: st, driver_lat: curLat, driver_lng: curLng}) });
             if (pct >= 1) {
