@@ -1,34 +1,74 @@
 {% extends "base.html" %}
+{% block title %}Sign In / Register - CabExpress{% endblock %}
+
 {% block content %}
-<main class="container" style="max-width:440px; margin-top:2rem;">
-    <article style="background:rgba(30,41,59,0.85); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:1.2rem;">
-        <div style="display:flex; gap:0.6rem; margin-bottom:1rem;">
-            <button id="tLogin" onclick="switchAuth('login')" style="padding:0.4rem; flex:1;">Login</button>
-            <button id="tReg" onclick="switchAuth('register')" class="outline" style="padding:0.4rem; flex:1;">Register</button>
+<main style="display: flex; justify-content: center; padding-top: 3rem;">
+    <div class="card" style="width: 100%; max-width: 420px;">
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem;">
+            <button type="button" id="tabLogin" onclick="switchAuthMode('login')" class="btn btn-primary btn-block">Sign In</button>
+            <button type="button" id="tabRegister" onclick="switchAuthMode('register')" class="btn btn-secondary btn-block">Register</button>
         </div>
+
         <form method="POST" action="/auth">
-            <input type="hidden" id="act" name="action" value="login">
-            <label>Username <input type="text" name="username" required></label>
-            <div id="emailBox" style="display:none;"><label>Email <input type="email" name="email"></label></div>
-            <label>Password <input type="password" name="password" required></label>
-            <div id="roleBox" style="display:none; margin-bottom:1rem;">
-                <label><input type="radio" name="role" value="passenger" checked> Passenger</label>
-                <label><input type="radio" name="role" value="driver"> Driver</label>
+            <input type="hidden" id="authAction" name="action" value="login">
+            
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" class="form-control" placeholder="Enter your username" required>
             </div>
-            <button type="submit" id="sBtn" style="background:#38bdf8; border:none; color:#0f172a; font-weight:700;">Sign In</button>
+
+            <div class="form-group" id="emailGroup" style="display: none;">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" class="form-control" placeholder="Enter your email address">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required>
+            </div>
+
+            <div class="form-group" id="roleGroup" style="display: none;">
+                <label>Account Type</label>
+                <div style="display: flex; gap: 1.5rem; margin-top: 0.25rem;">
+                    <label style="font-weight: normal; cursor: pointer;">
+                        <input type="radio" name="role" value="passenger" checked> Passenger
+                    </label>
+                    <label style="font-weight: normal; cursor: pointer;">
+                        <input type="radio" name="role" value="driver"> Driver
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn btn-primary btn-block" style="margin-top: 1rem;">Sign In</button>
         </form>
-    </article>
+    </div>
 </main>
+
 <script>
-    function switchAuth(m) {
-        document.getElementById('act').value = m;
-        document.getElementById('emailBox').style.display = m === 'register' ? 'block' : 'none';
-        document.getElementById('roleBox').style.display = m === 'register' ? 'block' : 'none';
-        const emailInput = document.querySelector('input[name="email"]');
-        if (emailInput) emailInput.required = (m === 'register');
-        document.getElementById('sBtn').innerText = m === 'register' ? 'Create Account' : 'Sign In';
-        document.getElementById('tLogin').className = m === 'login' ? '' : 'outline';
-        document.getElementById('tReg').className = m === 'register' ? '' : 'outline';
+    function switchAuthMode(mode) {
+        document.getElementById('authAction').value = mode;
+        const emailGroup = document.getElementById('emailGroup');
+        const roleGroup = document.getElementById('roleGroup');
+        const emailInput = document.getElementById('email');
+        const submitBtn = document.getElementById('submitBtn');
+        const tabLogin = document.getElementById('tabLogin');
+        const tabRegister = document.getElementById('tabRegister');
+
+        if (mode === 'register') {
+            emailGroup.style.display = 'block';
+            roleGroup.style.display = 'block';
+            emailInput.required = true;
+            submitBtn.innerText = 'Create Account';
+            tabLogin.className = 'btn btn-secondary btn-block';
+            tabRegister.className = 'btn btn-primary btn-block';
+        } else {
+            emailGroup.style.display = 'none';
+            roleGroup.style.display = 'none';
+            emailInput.required = false;
+            submitBtn.innerText = 'Sign In';
+            tabLogin.className = 'btn btn-primary btn-block';
+            tabRegister.className = 'btn btn-secondary btn-block';
+        }
     }
 </script>
 {% endblock %}

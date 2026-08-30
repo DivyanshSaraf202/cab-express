@@ -1,34 +1,66 @@
 {% extends "base.html" %}
+{% block title %}Driver Console - CabExpress{% endblock %}
+
 {% block content %}
-<div class="app-layout">
-    <div class="sidebar">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h4 style="margin:0;">Driver Console</h4><span class="status-badge badge-accepted">ONLINE</span>
-        </div>
+<div class="uber-canvas">
+    <!-- Full-Screen Map Canvas Background -->
+    <div id="map"></div>
 
-        <div style="display:flex; justify-content:space-between; background:rgba(255,255,255,0.05); padding:0.5rem; border-radius:8px;">
-            <div><small style="color:#94a3b8;">Earned</small><div id="totalEarned" style="font-weight:700; color:#10b981;">$0.00</div></div>
-            <div><small style="color:#94a3b8;">Trips</small><div id="tripCount" style="font-weight:700; color:#38bdf8;">0</div></div>
-            <div><small style="color:#94a3b8;">Rating</small><div id="avgRating" style="font-weight:700; color:#fba518;">⭐ 5.0</div></div>
+    <!-- Center-Top Floating Driver Stats Bar -->
+    <div class="center-top-panel" style="padding: 0.75rem 1rem; max-width: 440px;">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-label">Total Earned</div>
+                <div id="totalEarned" class="stat-val" style="color: #059669;">$0.00</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Trips</div>
+                <div id="tripCount" class="stat-val" style="color: #2563eb;">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Rating</div>
+                <div id="avgRating" class="stat-val" style="color: #d97706;">5.0 ★</div>
+            </div>
         </div>
+    </div>
 
-        <article id="simArea" style="display:none; border:1px solid #10b981; padding:0.6rem; margin:0; border-radius:8px;">
-            <strong style="color:#10b981;">Active Job Accepted</strong>
-            <div id="simMsg" style="font-size:0.8rem; margin-top:0.2rem;">Verify passenger OTP to start trip:</div>
+    <!-- Center-Bottom Floating Action Drawer Modal -->
+    <div class="center-bottom-panel">
+        <!-- Active Job Control Area -->
+        <div id="simulationCard" style="display: none; margin-bottom: 0.75rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <strong style="color: #047857; font-size: 0.95rem;">Active Job Accepted</strong>
+                <span class="status-badge badge-accepted">Active</span>
+            </div>
+            <p id="simulationMessage" style="font-size: 0.8rem; margin: 0 0 0.5rem; color: var(--text-muted);">
+                Verify passenger OTP code to start trip:
+            </p>
             
-            <div id="otpArea" style="margin-top:0.4rem;">
-                <input type="text" id="otpInput" placeholder="Enter 4-digit OTP" maxlength="4" style="padding:0.3rem; margin-bottom:0.4rem;">
-                <button onclick="startVerifiedTrip()" style="padding:0.3rem; background:#38bdf8; border:none; color:#0f172a; font-weight:700;">Verify OTP & Start</button>
+            <div id="otpInputSection" style="display: flex; gap: 0.5rem;">
+                <input type="text" id="driverOtpInput" class="form-control" placeholder="4-digit OTP" maxlength="4" style="max-width: 140px;">
+                <button type="button" onclick="startVerifiedTrip()" class="btn btn-primary" style="flex: 1; padding: 0.55rem;">Verify OTP</button>
             </div>
 
-            <button id="simBtn" onclick="runSim()" style="display:none; background:#10b981; border:none; color:#fff; font-weight:700; padding:0.3rem; margin-top:0.4rem; width:100%;">▶ Run Route Simulation</button>
-        </article>
+            <button type="button" id="startSimulationBtn" onclick="runSim()" class="btn btn-primary btn-block" style="display: none; background-color: #059669; margin-top: 0.5rem;">
+                Start Route Simulation
+            </button>
+        </div>
 
-        <strong>Incoming Requests</strong>
-        <div id="qList"><small>Searching...</small></div>
-        <button onclick="resetDemo()" class="secondary" style="margin-top:auto; padding:0.3rem; font-size:0.8rem;">🧹 Clear Rides</button>
+        <!-- Incoming Requests Feed -->
+        <div>
+            <h2 style="font-size: 0.95rem; font-weight: 700; margin: 0 0 0.5rem;">Incoming Job Requests</h2>
+            <div id="queueContainer"><small style="color: var(--text-muted);">Searching for ride requests...</small></div>
+        </div>
+
+        <button type="button" onclick="resetDemoData()" class="btn btn-secondary btn-block" style="margin-top: 0.75rem; padding: 0.35rem; font-size: 0.75rem;">
+            Clear Test Rides
+        </button>
     </div>
-    <div class="map-container"><div id="map"></div></div>
 </div>
 {% endblock %}
-{% block scripts %}<script>document.addEventListener('DOMContentLoaded', setupDriverMap);</script>{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', setupDriverMap);
+</script>
+{% endblock %}

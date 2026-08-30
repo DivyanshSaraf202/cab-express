@@ -1,52 +1,84 @@
 {% extends "base.html" %}
+{% block title %}Book Ride - CabExpress{% endblock %}
+
 {% block content %}
-<div class="app-layout">
-    <div class="sidebar">
-        <h4 style="margin:0;">Book a Cab</h4>
-        <small id="hint" style="color:#f59e0b;">💡 Search address or click map for <b>Pickup</b>.</small>
-        
-        <div style="position:relative;">
-            <label>Pickup <input type="text" id="pAddr" placeholder="Search address or click map" autocomplete="off"></label>
-            <div id="pSuggestions" class="suggestions-dropdown"></div>
+<div class="uber-canvas">
+    <!-- Full-Screen Map Canvas Background -->
+    <div id="map"></div>
+
+    <!-- Center-Top Floating Ride Request Box -->
+    <div class="center-top-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+            <h1 style="font-size: 1.15rem; font-weight: 800; margin: 0; letter-spacing: -0.5px;">Where to?</h1>
+            <details style="font-size: 0.8rem; position: relative;">
+                <summary style="cursor: pointer; font-weight: 600; color: var(--text-muted);">Trip History</summary>
+                <div id="historyContainer" style="position: absolute; right: 0; top: 100%; width: 280px; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 0.5rem; box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 3000;">
+                    <small style="color: var(--text-muted);">Loading trips...</small>
+                </div>
+            </details>
         </div>
 
-        <div style="position:relative;">
-            <label>Drop-off <input type="text" id="dAddr" placeholder="Search address or click map" autocomplete="off"></label>
-            <div id="dSuggestions" class="suggestions-dropdown"></div>
+        <div id="instructionHint" style="font-size: 0.78rem; color: #b45309; background-color: #fef3c7; padding: 0.45rem 0.65rem; border-radius: 6px; margin-bottom: 0.75rem;">
+            Search location or click map to select <strong>Pickup</strong>.
+        </div>
+
+        <div class="form-group">
+            <label for="pickupAddress">Pickup Location</label>
+            <input type="text" id="pickupAddress" class="form-control" placeholder="Enter pickup location or click map" autocomplete="off">
+            <div id="pickupSuggestions" class="suggestions-dropdown"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="dropoffAddress">Drop-off Destination</label>
+            <input type="text" id="dropoffAddress" class="form-control" placeholder="Enter destination or click map" autocomplete="off">
+            <div id="dropoffSuggestions" class="suggestions-dropdown"></div>
         </div>
 
         <div class="fare-box">
-            <div><small style="color:#94a3b8;">Est. Fare</small><div id="dist">0.0 km</div></div>
-            <strong id="fare" style="font-size:1.4rem; color:#38bdf8;">$0.00</strong>
+            <div>
+                <small style="color: var(--text-muted); display: block;">Distance</small>
+                <strong id="distanceValue">0.0 km</strong>
+            </div>
+            <div style="text-align: right;">
+                <small style="color: var(--text-muted); display: block;">Est. Fare</small>
+                <span id="fareValue" class="fare-amount">$0.00</span>
+            </div>
         </div>
-        <button id="bookBtn" onclick="requestRide()" style="background:#38bdf8; border:none; color:#0f172a; font-weight:700;" disabled>Book Ride</button>
-        
-        <article id="statusCard" style="display:none; padding:0.8rem; margin-top:0.4rem; background:rgba(30,41,59,0.85); border:1px solid rgba(255,255,255,0.1); border-radius:8px;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <strong>Status</strong><span id="badge" class="status-badge badge-pending">PENDING</span>
-            </div>
-            <div style="background:rgba(56,189,248,0.1); border:1px solid #38bdf8; border-radius:6px; padding:0.4rem; margin-top:0.4rem; text-align:center;">
-                <small>Give OTP to Driver</small>
-                <div id="otpVal" style="font-size:1.4rem; font-weight:700; color:#38bdf8; letter-spacing:3px;">----</div>
-            </div>
-            <button id="cancelBtn" onclick="cancelRide()" class="outline" style="margin-top:0.5rem; padding:0.3rem; font-size:0.8rem; border-color:#ef4444; color:#ef4444;">Cancel Ride</button>
-        </article>
 
-        <article id="ratingCard" style="display:none; padding:0.8rem; border:1px solid #10b981; border-radius:8px;">
-            <strong>Rate Your Driver</strong>
-            <div style="display:flex; gap:0.4rem; margin-top:0.4rem;">
-                <button onclick="submitRating(1)" style="padding:0.2rem 0.5rem;">1⭐</button>
-                <button onclick="submitRating(2)" style="padding:0.2rem 0.5rem;">2⭐</button>
-                <button onclick="submitRating(3)" style="padding:0.2rem 0.5rem;">3⭐</button>
-                <button onclick="submitRating(4)" style="padding:0.2rem 0.5rem;">4⭐</button>
-                <button onclick="submitRating(5)" style="padding:0.2rem 0.5rem; background:#10b981; border:none;">5⭐</button>
-            </div>
-        </article>
-
-        <h5 style="margin-top:0.8rem; margin-bottom:0.4rem;">Recent Trip History</h5>
-        <div id="historyBox"><small>Loading...</small></div>
+        <button type="button" id="bookRideBtn" onclick="requestRide()" class="btn btn-primary btn-block" disabled>Confirm & Book CabExpress</button>
     </div>
-    <div class="map-container"><div id="map"></div></div>
+
+    <!-- Center-Bottom Floating Ride Status & OTP Popup Modal -->
+    <div id="statusCard" class="center-bottom-panel" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong style="font-size: 0.85rem; text-transform: uppercase; color: var(--text-muted);">Ride Status</strong>
+            <span id="statusBadge" class="status-badge badge-pending">Pending</span>
+        </div>
+        
+        <div class="otp-box">
+            <small style="color: var(--text-muted); display: block; font-size: 0.75rem;">Share OTP with Driver upon arrival</small>
+            <div id="otpValue" class="otp-code">----</div>
+        </div>
+        
+        <button type="button" id="cancelRideBtn" onclick="cancelRide()" class="btn btn-danger btn-block" style="padding: 0.45rem; font-size: 0.85rem;">Cancel Ride Request</button>
+    </div>
+
+    <!-- Rating Popup Modal -->
+    <div id="ratingCard" class="center-bottom-panel" style="display: none; border-color: #10b981;">
+        <strong style="font-size: 0.9rem; color: #047857; display: block; margin-bottom: 0.5rem; text-align: center;">Rate Your Trip Experience</strong>
+        <div style="display: flex; gap: 0.35rem;">
+            <button type="button" onclick="submitRating(1)" class="btn btn-secondary" style="flex: 1; padding: 0.35rem;">1★</button>
+            <button type="button" onclick="submitRating(2)" class="btn btn-secondary" style="flex: 1; padding: 0.35rem;">2★</button>
+            <button type="button" onclick="submitRating(3)" class="btn btn-secondary" style="flex: 1; padding: 0.35rem;">3★</button>
+            <button type="button" onclick="submitRating(4)" class="btn btn-secondary" style="flex: 1; padding: 0.35rem;">4★</button>
+            <button type="button" onclick="submitRating(5)" class="btn btn-primary" style="flex: 1; padding: 0.35rem;">5★</button>
+        </div>
+    </div>
 </div>
 {% endblock %}
-{% block scripts %}<script>document.addEventListener('DOMContentLoaded', setupPassengerMap);</script>{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', setupPassengerMap);
+</script>
+{% endblock %}

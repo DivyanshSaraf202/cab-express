@@ -1,30 +1,47 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}CabExpress{% endblock %}</title>
-    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Leaflet Maps CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <!-- Application Stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
 </head>
 <body>
-    <nav class="main-nav">
-        <ul><li><a href="/" style="font-weight:700; color:#fff; text-decoration:none; font-size:1.3rem;">🚕 Cab<span style="color:#38bdf8;">Express</span></a></li></ul>
-        <ul>
+    <header class="navbar">
+        <a href="/" class="brand-link">
+            <span>Cab<span class="brand-accent">Express</span></span>
+        </a>
+        <div class="nav-user-info">
             {% if current_user.is_authenticated %}
-                <li><small>👤 {{ current_user.username }} (<strong>{{ current_user.role }}</strong>)</small></li>
-                <li><a href="/logout" class="outline" style="padding:0.2rem 0.6rem; font-size:0.8rem;">Logout</a></li>
+                <span>User: <strong>{{ current_user.username }}</strong></span>
+                <span class="role-badge">{{ current_user.role }}</span>
+                <a href="/logout" class="btn-nav-logout">Logout</a>
             {% else %}
-                <li><a href="/auth" class="outline" style="padding:0.2rem 0.6rem; font-size:0.8rem;">Sign In / Register</a></li>
+                <a href="/auth" class="btn-nav-logout">Sign In / Register</a>
             {% endif %}
-        </ul>
-    </nav>
-    {% with msgs = get_flashed_messages(with_categories=true) %}
-        {% for cat, msg in msgs %}<div class="alert-flash alert-{{ cat }}">{{ msg }}</div>{% endfor %}
+        </div>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
     {% endwith %}
+
     {% block content %}{% endblock %}
+
+    <!-- Leaflet Maps JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <!-- Application JavaScript Engine -->
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
     {% block scripts %}{% endblock %}
 </body>
